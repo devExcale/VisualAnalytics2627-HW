@@ -1,0 +1,65 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "title": "Leaving Time vs Arrival Margin",
+  "width": 350,
+  "height": 250,
+  "data": {
+    "url": "HW_030_scaccia.2006749.csv",
+    "format": {
+      "type": "csv",
+      "parse": {
+        "duration_min": "number",
+        "arrival_margin_min": "number"
+      }
+    }
+  },
+  "transform": [
+    {
+      "calculate": "datum.duration_min + datum.arrival_margin_min",
+      "as": "leaving_time_min"
+    }
+  ],
+  "mark": {
+    "type": "point",
+    "filled": true
+  },
+  "encoding": {
+    "x": {
+      "title": "Leaving Time (min)",
+      "field": "leaving_time_min",
+      "type": "quantitative",
+      "sort": "descending"
+    },
+    "y": {
+      "title": "Arrival Margin (min)",
+      "field": "arrival_margin_min",
+      "type": "quantitative"
+    },
+    "shape": {
+      "title": "Transport",
+      "field": "mode",
+      "type": "nominal"
+    },
+    "size": {
+      "title": "Distance (km)",
+      "field": "distance_km",
+      "scale": {
+        "domain": [
+          50,
+          150
+        ]
+      }
+    },
+    "color": {
+      "title": "Transport",
+      "field": "mode",
+      "type": "nominal"
+    },
+    "row": {
+      "field": "student_id"
+    },
+    "tooltip": {
+      "field": "arrival_margin_min"
+    }
+  }
+}

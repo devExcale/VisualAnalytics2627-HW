@@ -1,0 +1,152 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "title": "Timeline of Duration and Arrival",
+  "width": 500,
+  "data": {
+    "url": "HW_030_scaccia.2006749.csv",
+    "format": {
+      "parse": {
+        "duration_min": "number",
+        "arrival_margin_min": "number"
+      }
+    }
+  },
+  "transform": [
+    {
+      "filter": "datum.student_id == 'S1'"
+    },
+    {
+      "calculate": "datum.duration_min + datum.arrival_margin_min",
+      "as": "lesson_start_min"
+    },
+    {
+      "joinaggregate": [
+        {
+          "op": "mean",
+          "field": "duration_min",
+          "as": "AverageModeDuration"
+        }
+      ],
+      "groupby": [
+        "mode"
+      ]
+    }
+  ],
+  "resolve": {
+    "scale": {
+      "color": "independent"
+    }
+  },
+  "layer": [
+    {
+      "mark": {
+        "type": "bar"
+      },
+      "encoding": {
+        "x": {
+          "title": "Day",
+          "field": "date",
+          "type": "temporal",
+          "timeUnit": "monthdate",
+          "axis": {
+            "tickCount": {
+              "interval": "day",
+              "step": 1
+            },
+            "format": "%b %d",
+            "labelAngle": -45
+          },
+          "bandPosition": 0
+        },
+        "y": {
+          "title": "Duration (bar)",
+          "field": "duration_min",
+          "type": "quantitative"
+        },
+        "color": {
+          "field": "mode",
+          "type": "nominal",
+          "scale": {
+            "range": [
+              "teal",
+              "darkgreen"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "point",
+        "filled": true,
+        "opacity": 1,
+        "size": 80
+      },
+      "encoding": {
+        "x": {
+          "field": "date",
+          "type": "temporal",
+          "timeUnit": "monthdate"
+        },
+        "y": {
+          "title": "Lesson Start (point) (min)",
+          "field": "lesson_start_min",
+          "type": "quantitative"
+        },
+        "shape": {
+          "title": "Transport",
+          "field": "mode",
+          "type": "nominal"
+        },
+        "color": {
+          "title": "Arrival Margin (min)",
+          "field": "arrival_margin_min",
+          "scale": {
+            "scheme": "redyellowblue"
+          }
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "rule",
+        "size": 2,
+        "color": "#333333"
+      },
+      "encoding": {
+        "y": {
+          "field": "AverageModeDuration",
+          "type": "quantitative",
+          "aggregate": "mean"
+        },
+        "color": {
+          "field": "mode",
+          "type": "nominal",
+          "scale": {
+            "range": [
+              "teal",
+              "darkgreen"
+            ]
+          }
+        },
+        "strokeDash": {
+          "field": "mode",
+          "type": "nominal",
+          "title": "Mean Duration (Mode)",
+          "scale": {
+            "range": [
+              [
+                2,
+                3
+              ],
+              [
+                6,
+                4
+              ]
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

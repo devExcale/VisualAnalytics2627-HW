@@ -1,0 +1,33 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "title": "Margin of Arrival (positive = early / negative = late)",
+  "width": 350,
+  "height": 250,
+  "data": {
+    "url": "HW_030_scaccia.2006749.csv"
+  },
+  "mark": {
+    "type": "boxplot"
+  },
+  "encoding": {
+    "x": {
+      "title": "Mode",
+      "field": "mode",
+      "type": "nominal"
+    },
+    "y": {
+      "title": "Arrival margin (min)",
+      "field": "arrival_margin_min",
+      "type": "quantitative"
+    },
+    "xOffset": {
+      "field": "student_id",
+      "type": "nominal"
+    },
+    "color": {
+      "field": "student_id",
+      "type": "nominal",
+      "legend": null
+    }
+  }
+}

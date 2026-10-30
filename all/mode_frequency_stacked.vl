@@ -1,0 +1,29 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "title": "Margin of Arrival (positive = early / negative = late)",
+  "width": 350,
+  "height": 250,
+  "data": {
+    "url": "HW_030_scaccia.2006749.csv"
+  },
+  "mark": {
+    "type": "bar"
+  },
+  "encoding": {
+    "x": {
+      "title": "Transport",
+      "field": "mode",
+      "type": "nominal",
+      "sort": "-y"
+    },
+    "y": {
+      "aggregate": "count",
+      "stack": "zero"
+    },
+    "color": {
+      "title": "Student",
+      "field": "student_id",
+      "type": "nominal"
+    }
+  }
+}
