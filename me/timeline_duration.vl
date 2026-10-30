@@ -1,13 +1,22 @@
 {
-  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
-  "title": "Timeline of Duration and Arrival",
-  "width": 500,
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": {
+    "text": "Trip Duration & Punctuality (S1)",
+    "subtitle": "Bars show trip duration - Black marks show mean trip duration - Points show lesson start",
+    "anchor": "middle",
+    "fontSize": 14,
+    "subtitleFontSize": 11,
+    "subtitleColor": "#666666"
+  },
   "data": {
     "url": "HW_030_scaccia.2006749.csv",
     "format": {
+      "type": "csv",
       "parse": {
         "duration_min": "number",
-        "arrival_margin_min": "number"
+        "arrival_margin_min": "number",
+        "distance_km": "number",
+        "cost_eur": "number"
       }
     }
   },
@@ -17,136 +26,411 @@
     },
     {
       "calculate": "datum.duration_min + datum.arrival_margin_min",
-      "as": "lesson_start_min"
+      "as": "departure_buffer_min"
+    },
+    {
+      "calculate": "datum.arrival_margin_min < 0 ? 'Late' : 'On-Time'",
+      "as": "punctuality_status"
     },
     {
       "joinaggregate": [
         {
           "op": "mean",
           "field": "duration_min",
-          "as": "AverageModeDuration"
+          "as": "mode_mean_duration"
         }
       ],
       "groupby": [
         "mode"
       ]
+    },
+    {
+      "calculate": "datum.duration_min - datum.mode_mean_duration",
+      "as": "duration_deviation_min"
     }
   ],
   "resolve": {
     "scale": {
-      "color": "independent"
+      "y": "shared"
     }
   },
-  "layer": [
+  "hconcat": [
     {
-      "mark": {
-        "type": "bar"
+      "title": {
+        "text": "Daily Timeline",
+        "fontSize": 12,
+        "anchor": "middle"
       },
-      "encoding": {
-        "x": {
-          "title": "Day",
-          "field": "date",
-          "type": "temporal",
-          "timeUnit": "monthdate",
-          "axis": {
-            "tickCount": {
-              "interval": "day",
-              "step": 1
-            },
-            "format": "%b %d",
-            "labelAngle": -45
+      "width": 500,
+      "height": 280,
+      "resolve": {
+        "scale": {
+          "color": "independent"
+        }
+      },
+      "layer": [
+        {
+          "description": "Duration Bars",
+          "mark": {
+            "type": "bar",
+            "width": 13,
+            "opacity": 1,
+            "cornerRadiusTopLeft": 2,
+            "cornerRadiusTopRight": 2
           },
-          "bandPosition": 0
+          "encoding": {
+            "x": {
+              "title": "Trip Date",
+              "field": "date",
+              "type": "temporal",
+              "scale": {
+                "padding": 20
+              },
+              "axis": {
+                "format": "%a, %b %d",
+                "labelAngle": -45,
+                "labelOverlap": false,
+                "tickCount": {
+                  "interval": "day",
+                  "step": 1
+                }
+              }
+            },
+            "y": {
+              "title": "Trip Duration (min)",
+              "field": "duration_min",
+              "type": "quantitative",
+              "scale": {
+                "domain": [
+                  0,
+                  65
+                ]
+              },
+              "axis": {
+                "values": [
+                  0,
+                  5,
+                  10,
+                  15,
+                  20,
+                  25,
+                  30,
+                  35,
+                  40,
+                  45,
+                  50,
+                  55,
+                  60,
+                  65
+                ],
+                "labelOverlap": false,
+                "title": "Trip Duration (min)"
+              }
+            },
+            "color": {
+              "field": "mode",
+              "type": "nominal",
+              "scale": {
+                "domain": [
+                  "Bicycle",
+                  "Public transport"
+                ],
+                "range": [
+                  "#2ca25f",
+                  "#756bb1"
+                ]
+              },
+              "legend": null
+            },
+            "tooltip": [
+              {
+                "field": "date",
+                "type": "temporal",
+                "format": "%a, %b %d",
+                "title": "Date"
+              },
+              {
+                "field": "distance_km",
+                "type": "quantitative",
+                "format": ".2f",
+                "title": "Distance (km)"
+              },
+              {
+                "field": "duration_min",
+                "type": "quantitative",
+                "title": "Duration (min)"
+              },
+              {
+                "field": "punctuality_status",
+                "type": "nominal",
+                "title": "Status"
+              },
+              {
+                "field": "cost_eur",
+                "type": "quantitative",
+                "format": ".2f",
+                "title": "Cost (\u20ac)"
+              }
+            ]
+          }
         },
-        "y": {
-          "title": "Duration (bar)",
-          "field": "duration_min",
-          "type": "quantitative"
+        {
+          "description": "Mode Mean Baseline Ticks",
+          "mark": {
+            "type": "tick",
+            "color": "#000000",
+            "thickness": 2,
+            "size": 14,
+            "opacity": 1
+          },
+          "encoding": {
+            "x": {
+              "field": "date",
+              "type": "temporal"
+            },
+            "y": {
+              "field": "mode_mean_duration",
+              "type": "quantitative",
+              "axis": {
+                "labelOverlap": false,
+                "values": [
+                  0,
+                  5,
+                  10,
+                  15,
+                  20,
+                  25,
+                  30,
+                  35,
+                  40,
+                  45,
+                  50,
+                  55,
+                  60,
+                  65
+                ],
+                "title": "Trip Duration (min)"
+              },
+              "title": "Trip Duration (min)"
+            }
+          }
         },
-        "color": {
-          "field": "mode",
-          "type": "nominal",
-          "scale": {
-            "range": [
-              "teal",
-              "darkgreen"
+        {
+          "description": "Required Arrival Points",
+          "mark": {
+            "type": "point",
+            "filled": true,
+            "size": 75,
+            "opacity": 1,
+            "stroke": "#ffffff",
+            "strokeWidth": 1.5
+          },
+          "encoding": {
+            "x": {
+              "field": "date",
+              "type": "temporal"
+            },
+            "y": {
+              "field": "departure_buffer_min",
+              "type": "quantitative",
+              "axis": {
+                "labelOverlap": false,
+                "values": [
+                  0,
+                  5,
+                  10,
+                  15,
+                  20,
+                  25,
+                  30,
+                  35,
+                  40,
+                  45,
+                  50,
+                  55,
+                  60,
+                  65
+                ],
+                "title": "Trip Duration (min)"
+              },
+              "title": "Trip Duration (min)"
+            },
+            "color": {
+              "field": "punctuality_status",
+              "type": "nominal",
+              "scale": {
+                "domain": [
+                  "Late",
+                  "On-Time"
+                ],
+                "range": [
+                  "#d73027",
+                  "#4575b4"
+                ]
+              },
+              "legend": null
+            },
+            "shape": {
+              "field": "punctuality_status",
+              "type": "nominal",
+              "scale": {
+                "domain": [
+                  "Late",
+                  "On-Time"
+                ],
+                "range": [
+                  "cross",
+                  "circle"
+                ]
+              },
+              "legend": null
+            },
+            "tooltip": [
+              {
+                "field": "date",
+                "type": "temporal",
+                "format": "%a, %b %d",
+                "title": "Date"
+              },
+              {
+                "field": "departure_buffer_min",
+                "type": "quantitative",
+                "title": "Lesson Start Lead Time (min)"
+              },
+              {
+                "field": "arrival_margin_min",
+                "type": "quantitative",
+                "format": "+d",
+                "title": "Arrival Margin (min)"
+              },
+              {
+                "field": "punctuality_status",
+                "type": "nominal",
+                "title": "Punctuality"
+              }
             ]
           }
         }
-      }
+      ]
     },
     {
-      "mark": {
-        "type": "point",
-        "filled": true,
-        "opacity": 1,
-        "size": 80
+      "title": {
+        "text": "Duration",
+        "fontSize": 12,
+        "anchor": "middle"
       },
-      "encoding": {
-        "x": {
-          "field": "date",
-          "type": "temporal",
-          "timeUnit": "monthdate"
+      "width": 125,
+      "height": 280,
+      "resolve": {
+        "scale": {
+          "color": "independent"
+        }
+      },
+      "layer": [
+        {
+          "description": "Duration Boxplot with Whiskers, Median, and Outliers",
+          "mark": {
+            "type": "boxplot",
+            "size": 28,
+            "opacity": 1,
+            "median": {
+              "color": "black"
+            }
+          },
+          "encoding": {
+            "x": {
+              "field": "mode",
+              "type": "nominal",
+              "axis": {
+                "title": "Mode (Avg Distance)",
+                "labelAngle": 0,
+                "labelExpr": "datum.value == 'Bicycle' ? ['Bicycle', '(10.7 km)'] : ['Public transport', '(11.9 km)']"
+              }
+            },
+            "y": {
+              "field": "duration_min",
+              "type": "quantitative",
+              "scale": {
+                "domain": [
+                  0,
+                  65
+                ]
+              },
+              "axis": {
+                "title": null,
+                "values": [
+                  0,
+                  5,
+                  10,
+                  15,
+                  20,
+                  25,
+                  30,
+                  35,
+                  40,
+                  45,
+                  50,
+                  55,
+                  60,
+                  65
+                ],
+                "labelOverlap": false
+              }
+            },
+            "color": {
+              "title": "Transport Mode",
+              "field": "mode",
+              "type": "nominal",
+              "scale": {
+                "domain": [
+                  "Bicycle",
+                  "Public transport"
+                ],
+                "range": [
+                  "#2ca25f",
+                  "#756bb1"
+                ]
+              },
+              "legend": {
+                "orient": "right",
+                "symbolOpacity": 1,
+                "symbolSize": 75
+              }
+            }
+          }
         },
-        "y": {
-          "title": "Lesson Start (point) (min)",
-          "field": "lesson_start_min",
-          "type": "quantitative"
-        },
-        "shape": {
-          "title": "Transport",
-          "field": "mode",
-          "type": "nominal"
-        },
-        "color": {
-          "title": "Arrival Margin (min)",
-          "field": "arrival_margin_min",
-          "scale": {
-            "scheme": "redyellowblue"
+        {
+          "description": "Dummy point to host Punctuality legend on the far right",
+          "mark": {
+            "type": "point",
+            "filled": true,
+            "opacity": 0,
+            "size": 0
+          },
+          "encoding": {
+            "color": {
+              "title": "Punctuality",
+              "field": "punctuality_status",
+              "type": "nominal",
+              "scale": {
+                "domain": [
+                  "Late",
+                  "On-Time"
+                ],
+                "range": [
+                  "#d73027",
+                  "#4575b4"
+                ]
+              },
+              "legend": {
+                "orient": "right",
+                "symbolOpacity": 1,
+                "symbolSize": 75
+              }
+            }
           }
         }
-      }
-    },
-    {
-      "mark": {
-        "type": "rule",
-        "size": 2,
-        "color": "#333333"
-      },
-      "encoding": {
-        "y": {
-          "field": "AverageModeDuration",
-          "type": "quantitative",
-          "aggregate": "mean"
-        },
-        "color": {
-          "field": "mode",
-          "type": "nominal",
-          "scale": {
-            "range": [
-              "teal",
-              "darkgreen"
-            ]
-          }
-        },
-        "strokeDash": {
-          "field": "mode",
-          "type": "nominal",
-          "title": "Mean Duration (Mode)",
-          "scale": {
-            "range": [
-              [
-                2,
-                3
-              ],
-              [
-                6,
-                4
-              ]
-            ]
-          }
-        }
-      }
+      ]
     }
   ]
 }

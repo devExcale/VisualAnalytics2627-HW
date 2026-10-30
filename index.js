@@ -6,8 +6,12 @@ const PORT = 8080;
 const ROOT_DIR = process.cwd();
 const SPEC_EXTS = ['.vg', '.vl', '.vg.json', '.vl.json', '.json'];
 const WATCH_EXTS = ['.vg', '.vl', '.json', '.csv', '.tsv'];
-const IGNORE_DIRS = new Set(['node_modules', '.git', '.cache', 'dist', 'build', '.vscode', '.idea']);
+const IGNORE_DIRS = new Set(['node_modules', '.git', '.cache', 'dist', 'build', '.vscode', '.idea', 'img']);
 const IGNORE_FILES = new Set(['package.json', 'package-lock.json', 'tsconfig.json']);
+const IMG_DIR = path.join(ROOT_DIR, 'img');
+if (!fs.existsSync(IMG_DIR)) {
+  fs.mkdirSync(IMG_DIR, { recursive: true });
+}
 
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -315,6 +319,10 @@ const CLIENT_HTML = `<!DOCTYPE html>
       width: 100%;
     }
 
+    #vg-tooltip-element {
+      z-index: 100000 !important;
+    }
+
     dialog#fullscreenDialog {
       width: 100vw;
       height: 100vh;
@@ -479,7 +487,7 @@ const CLIENT_HTML = `<!DOCTYPE html>
       const loader = createCustomLoader(item.relPath, loadErrors);
 
       try {
-        await vegaEmbed(container, item.spec, {
+        const embedRes = await vegaEmbed(container, item.spec, {
           mode: item.mode,
           renderer: 'svg',
           loader,
@@ -490,6 +498,27 @@ const CLIENT_HTML = `<!DOCTYPE html>
           container.innerHTML = \`<div class="error-box">Data Load Error:\\n\${loadErrors.join('\\n')}</div>\`;
           return false;
         }
+
+        // Auto-save rendered SVG to backend img folder
+        try {
+          let svgString = null;
+          if (embedRes && embedRes.view && typeof embedRes.view.toSVG === 'function') {
+            svgString = await embedRes.view.toSVG();
+          } else {
+            const svgEl = container.querySelector('svg');
+            if (svgEl) svgString = svgEl.outerHTML;
+          }
+          if (svgString) {
+            fetch('/api/save-svg', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ relPath: item.relPath, svg: svgString }),
+            }).catch((e) => console.warn('Could not auto-save SVG:', e));
+          }
+        } catch (saveErr) {
+          console.warn('SVG extraction failed:', saveErr);
+        }
+
         return true;
       } catch (vgErr) {
         container.innerHTML = \`<div class="error-box">Vega Error:\\n\${vgErr.message}</div>\`;
@@ -581,8 +610,10 @@ const CLIENT_HTML = `<!DOCTYPE html>
       if (!dialog.open) {
         dialog.showModal();
       }
+      syncTooltipLocation();
 
       const ok = await renderSpecInto(dialogCanvas, item);
+      syncTooltipLocation();
       if (!ok) return;
 
       const svg = dialogCanvas.querySelector('svg');
@@ -607,6 +638,33 @@ const CLIENT_HTML = `<!DOCTYPE html>
     document.getElementById('zoomResetBtn').addEventListener('click', () => applyZoom(1));
     document.getElementById('zoomFitBtn').addEventListener('click', () => fitZoomToViewport());
     document.getElementById('closeDialogBtn').addEventListener('click', () => dialog.close());
+
+    function syncTooltipLocation() {
+      const tip = document.getElementById('vg-tooltip-element');
+      if (!tip) return;
+      if (dialog && dialog.open) {
+        if (tip.parentElement !== dialog) {
+          dialog.appendChild(tip);
+        }
+      } else {
+        if (tip.parentElement !== document.body) {
+          document.body.appendChild(tip);
+        }
+      }
+    }
+
+    const tooltipObserver = new MutationObserver(() => {
+      syncTooltipLocation();
+    });
+    tooltipObserver.observe(document.body, { childList: true });
+
+    dialog.addEventListener('close', () => {
+      syncTooltipLocation();
+    });
+
+    dialogViewport.addEventListener('mousemove', () => {
+      syncTooltipLocation();
+    });
 
     dialogViewport.addEventListener('wheel', (e) => {
       if (!dialog.open) return;
@@ -670,6 +728,33 @@ const server = http.createServer((req, res) => {
       'Cache-Control': 'no-cache',
     });
     return res.end(JSON.stringify(getSpecs()));
+  }
+
+  if (pathname === '/api/save-svg' && req.method === 'POST') {
+    let body = '';
+    req.on('data', (chunk) => { body += chunk; });
+    req.on('end', () => {
+      try {
+        const { relPath, svg } = JSON.parse(body);
+        if (!relPath || !svg) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          return res.end(JSON.stringify({ error: 'Missing relPath or svg' }));
+        }
+
+        const cleanRel = stripSpecExtension(relPath);
+        const targetPath = path.join(IMG_DIR, `${cleanRel}.svg`);
+        fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+        fs.writeFileSync(targetPath, svg, 'utf8');
+
+        console.log(`[SVG Saved] ${targetPath}`);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true, path: targetPath }));
+      } catch (err) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: err.message }));
+      }
+    });
+    return;
   }
 
   if (pathname === '/events') {
