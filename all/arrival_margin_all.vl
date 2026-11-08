@@ -1,12 +1,16 @@
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
   "title": {
-    "text": "Arrival Margin & Punctuality Reliability Across Modes and Students",
-    "subtitle": "Zero line marks lecture start deadline — Negative margins denote late arrivals — Points show all 80 trips",
+    "text": "Student Punctuality by Mode (S1 - S4)",
+    "subtitle": [
+      "Arrival margin distributions by mode across students, ordered by average distance",
+      "Boxplot width is proportional to trip mode count"
+    ],
     "anchor": "middle",
     "fontSize": 14,
     "subtitleFontSize": 11,
-    "subtitleColor": "#666666"
+    "subtitleColor": "#666666",
+    "subtitleLineHeight": 14
   },
   "data": {
     "url": "HW_030_scaccia.2006749.csv",
@@ -24,71 +28,137 @@
     {
       "calculate": "datum.arrival_margin_min < 0 ? 'Late' : 'On-Time'",
       "as": "punctuality_status"
+    },
+    {
+      "calculate": "'Lesson Start'",
+      "as": "deadline_label"
+    },
+    {
+      "joinaggregate": [
+        {
+          "op": "q1",
+          "field": "arrival_margin_min",
+          "as": "q1_margin"
+        },
+        {
+          "op": "q3",
+          "field": "arrival_margin_min",
+          "as": "q3_margin"
+        }
+      ],
+      "groupby": [
+        "student_id",
+        "mode"
+      ]
+    },
+    {
+      "calculate": "datum.q3_margin + 1.5 * (datum.q3_margin - datum.q1_margin)",
+      "as": "upper_whisker"
+    },
+    {
+      "joinaggregate": [
+        {
+          "op": "count",
+          "as": "trip_count"
+        }
+      ],
+      "groupby": [
+        "student_id",
+        "mode"
+      ]
     }
   ],
   "width": 560,
   "height": 320,
   "layer": [
     {
-      "description": "Late Region Background Shading",
-      "data": {
-        "values": [{ "y1": -25, "y2": 0 }]
-      },
+      "description": "Dummy point to host Transport Mode legend first",
       "mark": {
-        "type": "rect",
-        "fill": "#fee8e8",
-        "opacity": 0.5
+        "type": "point",
+        "opacity": 0,
+        "size": 0
       },
       "encoding": {
-        "y": {
-          "field": "y1",
-          "type": "quantitative"
-        },
-        "y2": {
-          "field": "y2"
+        "color": {
+          "field": "mode",
+          "type": "nominal",
+          "scale": {
+            "domain": [
+              "Bicycle",
+              "Public transport",
+              "Car",
+              "Walk"
+            ],
+            "range": [
+              "#2ca25f",
+              "#756bb1",
+              "#e6550d",
+              "#3182bd"
+            ]
+          },
+          "legend": {
+            "title": "Transport Mode",
+            "orient": "right",
+            "symbolSize": 70,
+            "symbolOpacity": 0.85,
+            "titleFontSize": 11,
+            "labelFontSize": 10
+          }
         }
       }
     },
     {
-      "description": "Deadline Boundary Reference Line at 0 min",
+      "description": "Zero Margin Lecture Start Deadline Rule with Punctuality Legend Header",
       "data": {
-        "values": [{ "deadline": 0 }]
+        "values": [{ "deadline_label": "Lesson Start" }]
       },
       "mark": {
         "type": "rule",
-        "stroke": "#d73027",
         "strokeWidth": 1.5,
-        "strokeDash": [5, 4]
+        "opacity": 0.9
       },
       "encoding": {
         "y": {
-          "field": "deadline",
-          "type": "quantitative"
-        }
-      }
-    },
-    {
-      "description": "Deadline Label",
-      "data": {
-        "values": [{ "deadline": 0, "label": "Lecture Start / Deadline (0 min Margin)" }]
-      },
-      "mark": {
-        "type": "text",
-        "align": "left",
-        "dx": 8,
-        "dy": -6,
-        "fontSize": 10,
-        "fontWeight": "bold",
-        "fill": "#b2182b"
-      },
-      "encoding": {
-        "y": {
-          "field": "deadline",
-          "type": "quantitative"
+          "datum": 0
         },
-        "text": {
-          "field": "label",
-          "type": "nominal"
+        "stroke": {
+          "field": "deadline_label",
+          "type": "nominal",
+          "scale": {
+            "domain": [
+              "Lesson Start"
+            ],
+            "range": [
+              "#d73027"
+            ]
+          },
+          "legend": {
+            "title": "Punctuality",
+            "orient": "right",
+            "titleFontSize": 11,
+            "labelFontSize": 10
+          }
+        },
+        "strokeDash": {
+          "field": "deadline_label",
+          "type": "nominal",
+          "scale": {
+            "domain": [
+              "Lesson Start"
+            ],
+            "range": [
+              [
+                4,
+                3
+              ]
+            ]
+          },
+          "legend": {
+            "title": "Punctuality",
+            "orient": "right",
+            "titleFontSize": 11,
+            "labelFontSize": 10
+          }
         }
       }
     },
@@ -96,21 +166,32 @@
       "description": "Arrival Margin Boxplots per Student and Mode",
       "mark": {
         "type": "boxplot",
-        "size": 24,
-        "opacity": 0.75,
+        "opacity": 0.85,
+        "outliers": false,
         "median": {
-          "color": "#111111",
-          "size": 2
+          "color": "#111111"
         },
-        "ticks": true
+        "ticks": false
       },
       "encoding": {
+        "size": {
+          "field": "trip_count",
+          "type": "quantitative",
+          "scale": {
+            "domain": [0, 13],
+            "range": [0, 20.8]
+          },
+          "legend": null
+        },
         "x": {
           "field": "student_id",
           "type": "nominal",
           "sort": ["S4", "S3", "S1", "S2"],
           "axis": {
-            "title": "Student (Mean Commute Distance to DIAG)",
+            "title": [
+              "Student",
+              "(Average distance)"
+            ],
             "labelAngle": 0,
             "labelExpr": "datum.value == 'S4' ? ['S4', '(1.9 km)'] : datum.value == 'S3' ? ['S3', '(6.8 km)'] : datum.value == 'S1' ? ['S1', '(11.5 km)'] : ['S2', '(14.1 km)']",
             "titlePadding": 10
@@ -124,38 +205,63 @@
           "field": "arrival_margin_min",
           "type": "quantitative",
           "scale": {
-            "domain": [-22, 20]
+            "domain": [
+              -25,
+              25
+            ],
+            "nice": false
           },
           "axis": {
-            "title": "Arrival Margin (min: positive = early, negative = late)",
-            "values": [-20, -15, -10, -5, 0, 5, 10, 15, 20],
-            "labelOverlap": false
+            "title": "Arrival margin (min)",
+            "values": [
+              -20,
+              -15,
+              -10,
+              -5,
+              0,
+              5,
+              10,
+              15,
+              20
+            ],
+            "tickCount": 9,
+            "labelOverlap": false,
+            "grid": true,
+            "gridColor": "#f0f0f0"
           }
         },
         "color": {
-          "title": "Transport Mode",
           "field": "mode",
           "type": "nominal",
           "scale": {
-            "domain": ["Bicycle", "Public transport", "Car", "Walk"],
-            "range": ["#2ca25f", "#756bb1", "#e6550d", "#3182bd"]
+            "domain": [
+              "Bicycle",
+              "Public transport",
+              "Car",
+              "Walk"
+            ],
+            "range": [
+              "#2ca25f",
+              "#756bb1",
+              "#e6550d",
+              "#3182bd"
+            ]
           },
-          "legend": {
-            "orient": "right",
-            "symbolSize": 75,
-            "titleFontSize": 11,
-            "labelFontSize": 10
-          }
+          "legend": null
         }
       }
     },
     {
-      "description": "Individual Trip Points Classified by Punctuality",
+      "description": "Positive Outliers (points) and Negative Data Points (crosses) Colored by Mode",
+      "transform": [
+        {
+          "filter": "datum.arrival_margin_min < 0 || datum.arrival_margin_min > datum.upper_whisker"
+        }
+      ],
       "mark": {
         "type": "point",
         "filled": true,
-        "size": 45,
-        "opacity": 0.85,
+        "size": 55,
         "stroke": "#ffffff",
         "strokeWidth": 0.8
       },
@@ -174,28 +280,44 @@
           "type": "quantitative"
         },
         "color": {
-          "title": "Punctuality",
-          "field": "punctuality_status",
+          "field": "mode",
           "type": "nominal",
           "scale": {
-            "domain": ["Late", "On-Time"],
-            "range": ["#d73027", "#4575b4"]
+            "domain": [
+              "Bicycle",
+              "Public transport",
+              "Car",
+              "Walk"
+            ],
+            "range": [
+              "#2ca25f",
+              "#756bb1",
+              "#e6550d",
+              "#3182bd"
+            ]
           },
-          "legend": {
-            "orient": "right",
-            "symbolSize": 75,
-            "titleFontSize": 11,
-            "labelFontSize": 10
-          }
+          "legend": null
         },
         "shape": {
           "field": "punctuality_status",
           "type": "nominal",
           "scale": {
-            "domain": ["Late", "On-Time"],
-            "range": ["cross", "circle"]
+            "domain": [
+              "On-Time",
+              "Late"
+            ],
+            "range": [
+              "circle",
+              "cross"
+            ]
           },
-          "legend": null
+          "legend": {
+            "title": null,
+            "orient": "right",
+            "symbolSize": 70,
+            "titleFontSize": 11,
+            "labelFontSize": 10
+          }
         },
         "tooltip": [
           { "field": "student_id", "type": "nominal", "title": "Student" },
@@ -209,5 +331,10 @@
         ]
       }
     }
-  ]
+  ],
+  "config": {
+    "legend": {
+      "margin": 3
+    }
+  }
 }
