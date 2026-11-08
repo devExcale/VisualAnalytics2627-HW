@@ -1,0 +1,181 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": {
+    "text": "Cross-Student Commute Duration & Distance Context (All 80 Journeys)",
+    "subtitle": "Students ordered by commute distance — Dashed line marks Group Pooled Median (33.5 min) — Points show individual trips",
+    "anchor": "middle",
+    "fontSize": 14,
+    "subtitleFontSize": 11,
+    "subtitleColor": "#666666"
+  },
+  "data": {
+    "url": "HW_030_scaccia.2006749.csv",
+    "format": {
+      "type": "csv",
+      "parse": {
+        "duration_min": "number",
+        "arrival_margin_min": "number",
+        "distance_km": "number",
+        "cost_eur": "number"
+      }
+    }
+  },
+  "transform": [
+    {
+      "calculate": "datum.arrival_margin_min < 0 ? 'Late' : 'On-Time'",
+      "as": "punctuality_status"
+    }
+  ],
+  "width": 560,
+  "height": 320,
+  "layer": [
+    {
+      "description": "Pooled Median Reference Rule (33.5 min)",
+      "data": {
+        "values": [{ "pooled_median": 33.5 }]
+      },
+      "mark": {
+        "type": "rule",
+        "stroke": "#555555",
+        "strokeWidth": 1.5,
+        "strokeDash": [5, 4]
+      },
+      "encoding": {
+        "y": {
+          "field": "pooled_median",
+          "type": "quantitative",
+          "axis": null
+        }
+      }
+    },
+    {
+      "description": "Pooled Median Annotation Label",
+      "data": {
+        "values": [{ "pooled_median": 33.5, "label": "Group Pooled Median (33.5 min)" }]
+      },
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "dx": 10,
+        "dy": -8,
+        "fontSize": 10,
+        "fontWeight": "bold",
+        "fill": "#444444"
+      },
+      "encoding": {
+        "y": {
+          "field": "pooled_median",
+          "type": "quantitative",
+          "axis": null
+        },
+        "text": {
+          "field": "label",
+          "type": "nominal"
+        }
+      }
+    },
+    {
+      "description": "Duration Boxplots per Student and Mode",
+      "mark": {
+        "type": "boxplot",
+        "size": 26,
+        "opacity": 0.85,
+        "median": {
+          "color": "#111111",
+          "size": 2
+        },
+        "ticks": true
+      },
+      "encoding": {
+        "x": {
+          "field": "student_id",
+          "type": "nominal",
+          "sort": ["S4", "S3", "S1", "S2"],
+          "axis": {
+            "title": "Student (Mean Commute Distance to DIAG)",
+            "labelAngle": 0,
+            "labelExpr": "datum.value == 'S4' ? ['S4', '(1.9 km)'] : datum.value == 'S3' ? ['S3', '(6.8 km)'] : datum.value == 'S1' ? ['S1', '(11.5 km)'] : ['S2', '(14.1 km)']",
+            "titlePadding": 10
+          }
+        },
+        "xOffset": {
+          "field": "mode",
+          "type": "nominal"
+        },
+        "y": {
+          "field": "duration_min",
+          "type": "quantitative",
+          "scale": {
+            "domain": [0, 70]
+          },
+          "axis": {
+            "title": "Commute Duration (min)",
+            "values": [0, 10, 20, 30, 40, 50, 60, 70],
+            "labelOverlap": false
+          }
+        },
+        "color": {
+          "title": "Transport Mode",
+          "field": "mode",
+          "type": "nominal",
+          "scale": {
+            "domain": ["Bicycle", "Public transport", "Car", "Walk"],
+            "range": ["#2ca25f", "#756bb1", "#e6550d", "#3182bd"]
+          },
+          "legend": {
+            "orient": "right",
+            "symbolSize": 75,
+            "titleFontSize": 11,
+            "labelFontSize": 10
+          }
+        }
+      }
+    },
+    {
+      "description": "Overlaid Individual Trip Points (Preserves Individual Visibility)",
+      "mark": {
+        "type": "point",
+        "filled": true,
+        "size": 35,
+        "opacity": 0.65,
+        "stroke": "#ffffff",
+        "strokeWidth": 0.5
+      },
+      "encoding": {
+        "x": {
+          "field": "student_id",
+          "type": "nominal",
+          "sort": ["S4", "S3", "S1", "S2"]
+        },
+        "xOffset": {
+          "field": "mode",
+          "type": "nominal"
+        },
+        "y": {
+          "field": "duration_min",
+          "type": "quantitative",
+          "axis": null
+        },
+        "color": {
+          "field": "mode",
+          "type": "nominal",
+          "scale": {
+            "domain": ["Bicycle", "Public transport", "Car", "Walk"],
+            "range": ["#2ca25f", "#756bb1", "#e6550d", "#3182bd"]
+          },
+          "legend": null
+        },
+        "tooltip": [
+          { "field": "student_id", "type": "nominal", "title": "Student" },
+          { "field": "date", "type": "temporal", "format": "%a, %b %d", "title": "Date" },
+          { "field": "mode", "type": "nominal", "title": "Mode" },
+          { "field": "distance_km", "type": "quantitative", "format": ".2f", "title": "Distance (km)" },
+          { "field": "duration_min", "type": "quantitative", "title": "Duration (min)" },
+          { "field": "cost_eur", "type": "quantitative", "format": ".2f", "title": "Cost (€)" },
+          { "field": "arrival_margin_min", "type": "quantitative", "format": "+d", "title": "Arrival Margin (min)" },
+          { "field": "punctuality_status", "type": "nominal", "title": "Punctuality" }
+        ]
+      }
+    }
+  ]
+}

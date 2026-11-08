@@ -34,16 +34,16 @@ To answer these questions, Table 1 aggregates my 20 journeys by transport modali
 
 > **Table 1: Modal Performance Comparison (Student S1)**
 
-| Commute Metric            | Bicycle                                                      | Public Transport                                              | *Overall (S1)*                                                  |
-|:------------------------- |:------------------------------------------------------------:|:-------------------------------------------------------------:|:---------------------------------------------------------------:|
-| **Trip Count**            | 7                                                            | 13                                                            | *20*                                                            |
-| **Average Distance**      | 10.7 km                                                      | 11.9 km                                                       | *11.5 km*                                                       |
-| **Average Duration**      | 40.1 min                                                     | 45.1 min                                                      | *43.4 min*                                                      |
-| **Median Duration**       | 40.0 min                                                     | 46.0 min                                                      | *41.0 min*                                                      |
+| Commute Metric            | Bicycle                                                      | PT                                                           | *Overall (S1)*                                                  |
+|:------------------------- |:------------------------------------------------------------:|:------------------------------------------------------------:|:---------------------------------------------------------------:|
+| **Trip Count**            | 7                                                            | 13                                                           | *20*                                                            |
+| **Average Distance**      | 10.7 km                                                      | 11.9 km                                                      | *11.5 km*                                                       |
+| **Average Duration**      | 40.1 min                                                     | 45.1 min                                                     | *43.4 min*                                                      |
+| **Median Duration**       | 40.0 min                                                     | 46.0 min                                                     | *41.0 min*                                                      |
 | **Duration Dispersion**   | $\sigma = \pm 4.2\text{ min}$, $\text{IQR} = 4.5\text{ min}$ | $\sigma = \pm 7.3\text{ min}$, $\text{IQR} = 12.0\text{ min}$ | *$\sigma = \pm 6.7\text{ min}$, $\text{IQR} = 10.5\text{ min}$* |
-| **Total Cost (Avg/Trip)** | €0.00 (€0.00)                                                | €32.24 (€2.48)                                                | *€32.24 (€1.61)*                                                |
-| **Late Trips (Rate)**     | 0 (0.0%)                                                     | 3 (23.1%)                                                     | *3 (15.0%)*                                                     |
-| **Average Margin**        | +7.7 min                                                     | +5.8 min                                                      | *+6.5 min*                                                      |
+| **Total Cost (Avg/Trip)** | €0.00 (€0.00)                                                | €32.24 (€2.48)                                               | *€32.24 (€1.61)*                                                |
+| **Late Trips (Rate)**     | 0 (0.0%)                                                     | 3 (23.1%)                                                    | *3 (15.0%)*                                                     |
+| **Average Margin**        | +7.7 min                                                     | +5.8 min                                                     | *+6.5 min*                                                      |
 
 Several clear findings emerge from this initial aggregation:
 
@@ -76,3 +76,50 @@ Two deeper empirical insights stand out from this visualization:
    
    - When cycling, my travel time remained between 35 and 42 minutes on 6 out of 7 days, leaving plenty of buffer. Even on October 22, when an unusual delay stretched my bicycle ride to 48 minutes (visible as an outlier on the boxplot), the 50-minute buffer still protected me.
    - When taking public transport, however, external factors frequently pushed travel times beyond the 50-minute threshold. Spikes on October 5 (5 min late), October 13 (4 min late), and October 19 (1 min late) clearly exceed the deadline points.
+
+## 2. Group Commute Analysis
+
+> **Table 2: Student Commute Profiles & Group Pooled Baseline**
+
+| Commuter | Route Distance | Modal Split | Typical Time | Spread (IQR) | Monthly Spend | Late Rate (Trips) | Departure Lead |
+|:---|:---:|:---|:---:|:---:|:---:|:---:|:---:|
+| **Student S4** | 1.9 km | PT (13), Walk (7) | 19 min | 7 min | €15.60 | 5% (1) | 24 min |
+| **Student S3** | 6.8 km | Bicycle (10), PT (10) | 29 min | 7 min | €19.60 | 10% (2) | 35 min |
+| **Student S1 (Me)** | 11.5 km | Bicycle (7), PT (13) | 41 min | 12 min | €32.24 | 15% (3) | 50 min |
+| **Student S2** | 14.1 km | Car (9), PT (11) | 41 min | 14 min | €53.89 | 30% (6) | 46 min |
+| *Group Benchmark* | *8.6 km* | *PT (47), Bike (17), Car (9), Walk (7)* | *34 min* | *16 min* | *€121.33* | *15% (12)* | *38 min* |
+
+> **Table 3: Modal Efficiency & Economics (Distance, Speed & Cost per km)**
+
+| Mode | Journeys | Mean Distance | Door-to-Door Speed | Unit Cost | Late Rate | Delay when Late |
+|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **Walk** | 7 | 1.7 km | 4.6 km/h | €0.00 / km | 0.0% | — |
+| **Bicycle** | 17 | 8.2 km | 15.5 km/h | €0.00 / km | 0.0% | — |
+| **PT** | 47 | 8.7 km | 13.3 km/h | €0.20 / km | 23.4% | 8.2 min |
+| **Car** | 9 | 13.7 km | 24.0 km/h | €0.31 / km | 11.1% | 3.0 min |
+
+> **Figure 2: Commute Duration & Modal Distributions Across Students**
+
+![Figure 2: Commute Duration Distributions Across Students](img/all/duration_distribution.svg)
+
+- **Task:** Compare trip duration distributions and dispersion across commuters and modalities, examining within-student variance against the Group Pooled Median.
+- **Data:** All 80 journeys, grouped by commuter (ordered by distance: S4 $\to$ S3 $\to$ S1 $\to$ S2) and broken down by chosen mode.
+- **Encodings:** 
+  - **Horizontal Position ($X$):** Commuter ordered by route distance, subdivided by transport mode.
+  - **Vertical Position ($Y$):** Door-to-door duration in minutes ($0$ to $70\text{ min}$, zero-baseline).
+  - **Marks:** Mode-specific Tukey boxplots overlaid with individual semi-transparent jittered points (preserving visibility of every single commute).
+  - **Color:** Mode category (Green for Bicycle, Purple for PT, Orange for Car, Blue for Walk).
+  - **Reference Line:** Dashed horizontal line at $33.5\text{ min}$ denoting the Group Pooled Median.
+
+> **Figure 3: Daily Student Punctuality (S1 - S4)**
+
+![Figure 3: Daily Student Punctuality (S1 - S4)](img/all/daily_student_punctuality.svg)
+
+- **Task:** Track longitudinal arrival margins across all commuters over 20 distinct weekdays, exposing city-wide systemic shocks, weather-driven modal choices, and habitual punctuality deficits.
+- **Data:** All 80 journeys along the 20-weekday temporal axis (October 5 to October 30, 2026), partitioned across four commuters.
+- **Encodings:**
+  - **Small Multiples (Rows):** Four vertically aligned subplots sharing identical horizontal and vertical scales, ordered from nearest ($S_4$) to farthest ($S_2$).
+  - **Horizontal Position ($X$):** Date across 20 weekdays.
+  - **Vertical Position ($Y$):** Arrival margin in minutes ($-25\text{ min}$ to $+25\text{ min}$).
+  - **Reference Line:** Dashed red rule at $0\text{ min}$ marking the lecture start deadline (documented in the chart legend).
+  - **Marks:** Discrete scatter points (without connecting lines, treating daily margins as independent events) colored by mode (Green = Bicycle, Purple = PT, Orange = Car, Blue = Walk) and shaped by punctuality status (Circle = On-Time, Cross = Late).

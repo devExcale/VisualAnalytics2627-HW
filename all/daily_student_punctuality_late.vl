@@ -1,0 +1,479 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": {
+    "text": "Daily Student Punctuality (S1 - S4) - Late Exceptions",
+    "subtitle": "Daily arrival margin vs. expected arrival on late days, subcharts ordered by average distance",
+    "anchor": "middle",
+    "fontSize": 14,
+    "subtitleFontSize": 11,
+    "subtitleColor": "#666666"
+  },
+  "data": {
+    "url": "HW_030_scaccia.2006749.csv",
+    "format": {
+      "type": "csv",
+      "parse": {
+        "duration_min": "number",
+        "arrival_margin_min": "number",
+        "distance_km": "number",
+        "cost_eur": "number"
+      }
+    }
+  },
+  "transform": [
+    {
+      "calculate": "datum.arrival_margin_min < 0 ? 'Late' : 'On-Time'",
+      "as": "punctuality_status"
+    },
+    {
+      "calculate": "'Lesson Start'",
+      "as": "deadline_label"
+    },
+    {
+      "joinaggregate": [
+        {
+          "op": "median",
+          "field": "duration_min",
+          "as": "median_duration"
+        }
+      ],
+      "groupby": [
+        "student_id",
+        "mode"
+      ]
+    },
+    {
+      "calculate": "datum.arrival_margin_min + (datum.duration_min - datum.median_duration)",
+      "as": "expected_margin_min"
+    }
+  ],
+  "facet": {
+    "row": {
+      "field": "student_id",
+      "type": "nominal",
+      "sort": [
+        "S4",
+        "S3",
+        "S1",
+        "S2"
+      ],
+      "header": {
+        "title": "Arrival margin (min)",
+        "titleOrient": "left",
+        "titleAnchor": "middle",
+        "titleAngle": -90,
+        "titleFontSize": 12,
+        "titleFontWeight": "bold",
+        "titlePadding": 10,
+        "labelOrient": "left",
+        "labelAnchor": "middle",
+        "labelAngle": -90,
+        "labelFontSize": 11,
+        "labelFontWeight": "bold",
+        "labelPadding": 10,
+        "labelExpr": "datum.value == 'S4' ? 'S4 (1.9 km)' : datum.value == 'S3' ? 'S3 (6.8 km)' : datum.value == 'S1' ? 'S1 (11.5 km)' : 'S2 (14.1 km)'"
+      }
+    }
+  },
+  "spec": {
+    "width": 580,
+    "height": 120,
+    "layer": [
+      {
+        "description": "Dummy point to host Transport Mode legend first",
+        "mark": {
+          "type": "point",
+          "opacity": 0,
+          "size": 0
+        },
+        "encoding": {
+          "color": {
+            "field": "mode",
+            "type": "nominal",
+            "scale": {
+              "domain": [
+                "Bicycle",
+                "Public transport",
+                "Car",
+                "Walk"
+              ],
+              "range": [
+                "#2ca25f",
+                "#756bb1",
+                "#e6550d",
+                "#3182bd"
+              ]
+            },
+            "legend": {
+              "title": "Transport Mode",
+              "orient": "right",
+              "symbolSize": 70,
+              "symbolOpacity": 0.7,
+              "titleFontSize": 11,
+              "labelFontSize": 10
+            }
+          }
+        }
+      },
+      {
+        "description": "Zero Margin Lecture Start Deadline Rule with Punctuality Legend Header",
+        "mark": {
+          "type": "rule",
+          "strokeWidth": 1.5,
+          "opacity": 0.9
+        },
+        "encoding": {
+          "y": {
+            "datum": 0
+          },
+          "stroke": {
+            "field": "deadline_label",
+            "type": "nominal",
+            "scale": {
+              "domain": [
+                "Lesson Start"
+              ],
+              "range": [
+                "#d73027"
+              ]
+            },
+            "legend": {
+              "title": "Punctuality",
+              "orient": "right",
+              "titleFontSize": 11,
+              "labelFontSize": 10
+            }
+          },
+          "strokeDash": {
+            "field": "deadline_label",
+            "type": "nominal",
+            "scale": {
+              "domain": [
+                "Lesson Start"
+              ],
+              "range": [
+                [
+                  4,
+                  3
+                ]
+              ]
+            },
+            "legend": {
+              "title": "Punctuality",
+              "orient": "right",
+              "titleFontSize": 11,
+              "labelFontSize": 10
+            }
+          }
+        }
+      },
+      {
+        "description": "Dropline Connecting Actual Arrival to Expected Arrival on Late Days",
+        "transform": [
+          {
+            "filter": "datum.arrival_margin_min < 0"
+          }
+        ],
+        "mark": {
+          "type": "rule",
+          "stroke": "#555555",
+          "strokeWidth": 1.5,
+          "strokeDash": [
+            2,
+            2
+          ]
+        },
+        "encoding": {
+          "x": {
+            "field": "date",
+            "type": "temporal",
+            "scale": {
+              "padding": 20
+            }
+          },
+          "y": {
+            "field": "arrival_margin_min",
+            "type": "quantitative",
+            "scale": {
+              "domain": [
+                -25,
+                25
+              ],
+              "nice": false
+            },
+            "axis": {
+              "title": null,
+              "values": [
+                -20,
+                -10,
+                0,
+                10,
+                20
+              ],
+              "tickCount": 5,
+              "labelOverlap": false,
+              "grid": true,
+              "gridColor": "#f0f0f0"
+            }
+          },
+          "y2": {
+            "field": "expected_margin_min"
+          }
+        }
+      },
+      {
+        "description": "Daily Commute Scatter Points Colored by Mode and Shaped by Punctuality",
+        "mark": {
+          "type": "point",
+          "filled": true,
+          "size": 55,
+          "stroke": "#ffffff",
+          "strokeWidth": 0.8
+        },
+        "encoding": {
+          "x": {
+            "field": "date",
+            "type": "temporal",
+            "scale": {
+              "padding": 20
+            },
+            "axis": {
+              "title": "Trip Date",
+              "format": "%a, %b %d",
+              "labelAngle": -45,
+              "labelOverlap": false,
+              "tickCount": {
+                "interval": "day",
+                "step": 1
+              },
+              "grid": true,
+              "gridColor": "#f0f0f0"
+            }
+          },
+          "y": {
+            "field": "arrival_margin_min",
+            "type": "quantitative",
+            "scale": {
+              "domain": [
+                -25,
+                25
+              ],
+              "nice": false
+            },
+            "axis": {
+              "title": null,
+              "values": [
+                -20,
+                -10,
+                0,
+                10,
+                20
+              ],
+              "tickCount": 5,
+              "labelOverlap": false,
+              "grid": true,
+              "gridColor": "#f0f0f0"
+            }
+          },
+          "color": {
+            "field": "mode",
+            "type": "nominal",
+            "scale": {
+              "domain": [
+                "Bicycle",
+                "Public transport",
+                "Car",
+                "Walk"
+              ],
+              "range": [
+                "#2ca25f",
+                "#756bb1",
+                "#e6550d",
+                "#3182bd"
+              ]
+            },
+            "legend": null
+          },
+          "shape": {
+            "field": "punctuality_status",
+            "type": "nominal",
+            "scale": {
+              "domain": [
+                "On-Time",
+                "Late",
+                "Expected (median)"
+              ],
+              "range": [
+                "circle",
+                "cross",
+                "diamond"
+              ]
+            },
+            "legend": {
+              "title": null,
+              "orient": "right",
+              "symbolSize": 70,
+              "titleFontSize": 11,
+              "labelFontSize": 10
+            }
+          },
+          "tooltip": [
+            {
+              "field": "student_id",
+              "type": "nominal",
+              "title": "Student"
+            },
+            {
+              "field": "date",
+              "type": "temporal",
+              "format": "%a, %b %d",
+              "title": "Date"
+            },
+            {
+              "field": "mode",
+              "type": "nominal",
+              "title": "Mode"
+            },
+            {
+              "field": "duration_min",
+              "type": "quantitative",
+              "title": "Duration (min)"
+            },
+            {
+              "field": "median_duration",
+              "type": "quantitative",
+              "title": "Median Duration (min)"
+            },
+            {
+              "field": "arrival_margin_min",
+              "type": "quantitative",
+              "format": "+d",
+              "title": "Arrival Margin (min)"
+            },
+            {
+              "field": "expected_margin_min",
+              "type": "quantitative",
+              "format": "+d",
+              "title": "Expected Margin (min)"
+            },
+            {
+              "field": "distance_km",
+              "type": "quantitative",
+              "format": ".2f",
+              "title": "Distance (km)"
+            },
+            {
+              "field": "cost_eur",
+              "type": "quantitative",
+              "format": ".2f",
+              "title": "Cost (€)"
+            }
+          ]
+        }
+      },
+      {
+        "description": "Expected Arrival Benchmark Point on Late Days",
+        "transform": [
+          {
+            "filter": "datum.arrival_margin_min < 0"
+          },
+          {
+            "calculate": "'Expected (median)'",
+            "as": "punctuality_status"
+          }
+        ],
+        "mark": {
+          "type": "point",
+          "size": 50,
+          "filled": true,
+          "color": "#111111",
+          "stroke": "#ffffff",
+          "strokeWidth": 0.8
+        },
+        "encoding": {
+          "x": {
+            "field": "date",
+            "type": "temporal",
+            "scale": {
+              "padding": 20
+            }
+          },
+          "y": {
+            "field": "expected_margin_min",
+            "type": "quantitative"
+          },
+          "shape": {
+            "field": "punctuality_status",
+            "type": "nominal",
+            "scale": {
+              "domain": [
+                "On-Time",
+                "Late",
+                "Expected (median)"
+              ],
+              "range": [
+                "circle",
+                "cross",
+                "diamond"
+              ]
+            },
+            "legend": null
+          },
+          "tooltip": [
+            {
+              "field": "student_id",
+              "type": "nominal",
+              "title": "Student"
+            },
+            {
+              "field": "date",
+              "type": "temporal",
+              "format": "%a, %b %d",
+              "title": "Date"
+            },
+            {
+              "field": "mode",
+              "type": "nominal",
+              "title": "Mode"
+            },
+            {
+              "field": "duration_min",
+              "type": "quantitative",
+              "title": "Actual Duration (min)"
+            },
+            {
+              "field": "median_duration",
+              "type": "quantitative",
+              "title": "Median Duration (min)"
+            },
+            {
+              "field": "expected_margin_min",
+              "type": "quantitative",
+              "format": "+d",
+              "title": "Expected Margin (min)"
+            },
+            {
+              "field": "arrival_margin_min",
+              "type": "quantitative",
+              "format": "+d",
+              "title": "Actual Margin (min)"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "resolve": {
+    "scale": {
+      "y": "independent"
+    },
+    "axis": {
+      "x": "shared"
+    }
+  },
+  "config": {
+    "legend": {
+      "margin": 3
+    }
+  }
+}
