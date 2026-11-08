@@ -81,17 +81,17 @@
                 "Walk"
               ],
               "range": [
-                "#2ca25f",
-                "#756bb1",
-                "#e6550d",
-                "#3182bd"
+                "#66c2a5",
+                "#8da0cb",
+                "#fc8d62",
+                "#e78ac3"
               ]
             },
             "legend": {
               "title": "Transport Mode",
               "orient": "right",
               "symbolSize": 70,
-              "symbolOpacity": 0.7,
+              "symbolOpacity": 1,
               "titleFontSize": 11,
               "labelFontSize": 10
             }
@@ -103,7 +103,7 @@
         "mark": {
           "type": "rule",
           "strokeWidth": 1.5,
-          "opacity": 0.9
+          "opacity": 1
         },
         "encoding": {
           "y": {
@@ -157,7 +157,8 @@
           "filled": true,
           "size": 55,
           "stroke": "#ffffff",
-          "strokeWidth": 0.8
+          "strokeWidth": 0.8,
+          "opacity": 1
         },
         "encoding": {
           "x": {
@@ -215,10 +216,10 @@
                 "Walk"
               ],
               "range": [
-                "#2ca25f",
-                "#756bb1",
-                "#e6550d",
-                "#3182bd"
+                "#66c2a5",
+                "#8da0cb",
+                "#fc8d62",
+                "#e78ac3"
               ]
             },
             "legend": null
@@ -241,7 +242,8 @@
               "orient": "right",
               "symbolSize": 70,
               "titleFontSize": 11,
-              "labelFontSize": 10
+              "labelFontSize": 10,
+              "symbolOpacity": 1
             }
           },
           "tooltip": [
@@ -282,7 +284,7 @@
               "field": "cost_eur",
               "type": "quantitative",
               "format": ".2f",
-              "title": "Cost (€)"
+              "title": "Cost (\u20ac)"
             }
           ]
         }

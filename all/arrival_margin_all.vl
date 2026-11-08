@@ -90,17 +90,17 @@
               "Walk"
             ],
             "range": [
-              "#2ca25f",
-              "#756bb1",
-              "#e6550d",
-              "#3182bd"
+              "#66c2a5",
+              "#8da0cb",
+              "#fc8d62",
+              "#e78ac3"
             ]
           },
           "legend": {
             "title": "Transport Mode",
             "orient": "right",
             "symbolSize": 70,
-            "symbolOpacity": 0.85,
+            "symbolOpacity": 1,
             "titleFontSize": 11,
             "labelFontSize": 10
           }
@@ -110,12 +110,16 @@
     {
       "description": "Zero Margin Lecture Start Deadline Rule with Punctuality Legend Header",
       "data": {
-        "values": [{ "deadline_label": "Lesson Start" }]
+        "values": [
+          {
+            "deadline_label": "Lesson Start"
+          }
+        ]
       },
       "mark": {
         "type": "rule",
         "strokeWidth": 1.5,
-        "opacity": 0.9
+        "opacity": 1
       },
       "encoding": {
         "y": {
@@ -166,7 +170,7 @@
       "description": "Arrival Margin Boxplots per Student and Mode",
       "mark": {
         "type": "boxplot",
-        "opacity": 0.85,
+        "opacity": 1,
         "outliers": false,
         "median": {
           "color": "#111111"
@@ -178,15 +182,26 @@
           "field": "trip_count",
           "type": "quantitative",
           "scale": {
-            "domain": [0, 13],
-            "range": [0, 20.8]
+            "domain": [
+              0,
+              13
+            ],
+            "range": [
+              0,
+              20.8
+            ]
           },
           "legend": null
         },
         "x": {
           "field": "student_id",
           "type": "nominal",
-          "sort": ["S4", "S3", "S1", "S2"],
+          "sort": [
+            "S4",
+            "S3",
+            "S1",
+            "S2"
+          ],
           "axis": {
             "title": [
               "Student",
@@ -241,10 +256,10 @@
               "Walk"
             ],
             "range": [
-              "#2ca25f",
-              "#756bb1",
-              "#e6550d",
-              "#3182bd"
+              "#66c2a5",
+              "#8da0cb",
+              "#fc8d62",
+              "#e78ac3"
             ]
           },
           "legend": null
@@ -263,13 +278,19 @@
         "filled": true,
         "size": 55,
         "stroke": "#ffffff",
-        "strokeWidth": 0.8
+        "strokeWidth": 0.8,
+        "opacity": 1
       },
       "encoding": {
         "x": {
           "field": "student_id",
           "type": "nominal",
-          "sort": ["S4", "S3", "S1", "S2"]
+          "sort": [
+            "S4",
+            "S3",
+            "S1",
+            "S2"
+          ]
         },
         "xOffset": {
           "field": "mode",
@@ -290,10 +311,10 @@
               "Walk"
             ],
             "range": [
-              "#2ca25f",
-              "#756bb1",
-              "#e6550d",
-              "#3182bd"
+              "#66c2a5",
+              "#8da0cb",
+              "#fc8d62",
+              "#e78ac3"
             ]
           },
           "legend": null
@@ -316,18 +337,55 @@
             "orient": "right",
             "symbolSize": 70,
             "titleFontSize": 11,
-            "labelFontSize": 10
+            "labelFontSize": 10,
+            "symbolOpacity": 1
           }
         },
         "tooltip": [
-          { "field": "student_id", "type": "nominal", "title": "Student" },
-          { "field": "date", "type": "temporal", "format": "%a, %b %d", "title": "Date" },
-          { "field": "mode", "type": "nominal", "title": "Mode" },
-          { "field": "arrival_margin_min", "type": "quantitative", "format": "+d", "title": "Arrival Margin (min)" },
-          { "field": "punctuality_status", "type": "nominal", "title": "Status" },
-          { "field": "duration_min", "type": "quantitative", "title": "Duration (min)" },
-          { "field": "distance_km", "type": "quantitative", "format": ".2f", "title": "Distance (km)" },
-          { "field": "cost_eur", "type": "quantitative", "format": ".2f", "title": "Cost (€)" }
+          {
+            "field": "student_id",
+            "type": "nominal",
+            "title": "Student"
+          },
+          {
+            "field": "date",
+            "type": "temporal",
+            "format": "%a, %b %d",
+            "title": "Date"
+          },
+          {
+            "field": "mode",
+            "type": "nominal",
+            "title": "Mode"
+          },
+          {
+            "field": "arrival_margin_min",
+            "type": "quantitative",
+            "format": "+d",
+            "title": "Arrival Margin (min)"
+          },
+          {
+            "field": "punctuality_status",
+            "type": "nominal",
+            "title": "Status"
+          },
+          {
+            "field": "duration_min",
+            "type": "quantitative",
+            "title": "Duration (min)"
+          },
+          {
+            "field": "distance_km",
+            "type": "quantitative",
+            "format": ".2f",
+            "title": "Distance (km)"
+          },
+          {
+            "field": "cost_eur",
+            "type": "quantitative",
+            "format": ".2f",
+            "title": "Cost (\u20ac)"
+          }
         ]
       }
     }

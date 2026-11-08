@@ -136,8 +136,8 @@
                   "Public transport"
                 ],
                 "range": [
-                  "#2ca25f",
-                  "#756bb1"
+                  "#66c2a5",
+                  "#8da0cb"
                 ]
               },
               "legend": null
@@ -315,7 +315,7 @@
     },
     {
       "title": {
-        "text": "Duration",
+        "text": "Duration Distribution",
         "fontSize": 12,
         "anchor": "middle"
       },
@@ -342,7 +342,10 @@
               "field": "mode",
               "type": "nominal",
               "axis": {
-                "title": "Mode (Avg Distance)",
+                "title": [
+                  "Mode",
+                  "(Average Distance)"
+                ],
                 "labelAngle": 0,
                 "labelExpr": "datum.value == 'Bicycle' ? ['Bicycle', '(10.7 km)'] : ['Public transport', '(11.9 km)']"
               }
@@ -387,8 +390,8 @@
                   "Public transport"
                 ],
                 "range": [
-                  "#2ca25f",
-                  "#756bb1"
+                  "#66c2a5",
+                  "#8da0cb"
                 ]
               },
               "legend": {
